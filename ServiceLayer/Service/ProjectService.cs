@@ -16,12 +16,16 @@ public class ProjectService(IProjectRepo projectRepo) : IProjectService
 
     public async Task<UpdateProjectDto> UpdateProject(Project? project, int id)
     {
-        await projectRepo.UpdateProject(project, id);
-        return project.ProjectToUpdateProject();
+        var updatedProject = await projectRepo.UpdateProject(project, id);
+        if (updatedProject == null)
+        {
+            return null;
+        }
+        return updatedProject.ProjectToUpdateProject();
     }
 
     public async Task<bool> DeleteProject(int id)
-    {
+    { 
         return await projectRepo.DeleteProject(id);
     }
 

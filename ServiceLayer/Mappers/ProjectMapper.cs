@@ -1,5 +1,7 @@
 ﻿using Task_Managment_API.DataLayer.Entites;
 using Task_Managment_API.ServiceLayer.Dto.ProjectDtos;
+using Task_Managment_API.ServiceLayer.Dto.TasksDtos;
+using Task_Managment_API.ServiceLayer.Dto.UserProjectDto;
 
 namespace Task_Managment_API.ServiceLayer.Mappers
 {
@@ -7,6 +9,11 @@ namespace Task_Managment_API.ServiceLayer.Mappers
     {
         public static ProjectDto ProjectToProjectDto(this Project? project)
         {
+            if (project == null)
+            {
+                throw new ArgumentNullException(nameof(project));
+            }
+
             return new ProjectDto
             {
                 Id = project.Id,
@@ -16,10 +23,11 @@ namespace Task_Managment_API.ServiceLayer.Mappers
                 EndDate = project.EndDate,
                 CreatedAt = project.CreatedAt,
                 UpdatedAt = project.UpdatedAt,
-                // when u make a TasksDto class u change  it here  to project.Tasks.Select(x => x.TaskToTaskDto()).ToList()
-                Tasks = project.Tasks
+                Tasks = project.Tasks?.Select(x => x.TasksMapToTasksDto()).ToList() ?? new List<TasksDto>(),
+                UserProjects = project.UserProject?.Select(x => x.MapToDto()).ToList() ?? new List<UserProjectDto>()
             };
         }
+
 
         public static UpdateProjectDto ProjectToUpdateProject(this Project? project)
         {

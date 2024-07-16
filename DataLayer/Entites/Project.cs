@@ -11,7 +11,7 @@ namespace Task_Managment_API.DataLayer.Entites
         public DateTime EndDate { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public ICollection<Tasks> Tasks { get; set; }
-        public ICollection<ProjectsCollaborators> UserProject { get; set; }
+        public ICollection<Tasks> Tasks { get; set; } = new List<Tasks>();
+        public ICollection<ProjectsCollaborators> UserProject { get; set; } = new List<ProjectsCollaborators>();
     }
 }

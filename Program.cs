@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Task_Managment_API.DataLayer.Entites;
 using Task_Managment_API.DataLayer.Entities;
+using Task_Managment_API.DomainLayer.ExceptionHandler;
 using Task_Managment_API.DomainLayer.IRepo;
 using Task_Managment_API.DomainLayer.Repo;
 using Task_Managment_API.ServiceLayer.IService;
@@ -45,6 +46,12 @@ builder.Services.AddScoped<IUserTaskService, UserTaskService>();
 builder.Services.AddScoped<IUserProjectRepo, UserProjectRepo>();
 builder.Services.AddScoped<IUserProjectsService, UserProjectService>();
 
+
+// Error Handling init in DI
+ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+ builder.Services.AddProblemDetails();
+
+// 
 
 // Registering Repositories and Services
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
@@ -124,6 +131,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseExceptionHandler();
 app.UseResponseCaching();
 app.UseHttpsRedirection();
 app.MapControllers();

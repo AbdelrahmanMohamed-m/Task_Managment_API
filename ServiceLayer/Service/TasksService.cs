@@ -25,29 +25,14 @@ public class TasksService : ITasksService
 
     public async Task<TasksDto?> AddTask(Tasks? task, int projectId, string userId)
     {
-        try
-        {
-            var taskEntity = await _tasksRepo.AddTask(task, projectId, userId);
-            return taskEntity.TasksMapToTasksDto();
-        }
-        catch (DbUpdateException ex)
-        {
-            throw new KeyNotFoundException("The provided key is not valid.");
-        }
+        var taskEntity = await _tasksRepo.AddTask(task, projectId, userId);
+        return taskEntity.TasksMapToTasksDto();
     }
 
     public async Task<TasksDto?> GetTaskById(int id)
     {
-        try
-        {
             var task = await _tasksRepo.GetTaskById(id);
-
             return task.TasksMapToTasksDto();
-        }
-        catch (Exception e)
-        {
-            throw new KeyNotFoundException("The provided key is not valid.");
-        }
     }
 
     public async Task<TasksDto?> UpdateTask(int id, Tasks? task)

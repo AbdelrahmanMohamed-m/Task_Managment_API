@@ -33,7 +33,7 @@ public class ProjectRepo : IProjectRepo
     public async Task<List<Project>> GetAllUserProjects(string id)
     {
         return await _context.Projects
-            .Include(p => p.UserProject)
+            .Include(p => p.UserProject).Include(project => project.Tasks)
             .Where(p => p.UserProject.Any(up => up.UserId == id))
             .ToListAsync();
     }
@@ -130,6 +130,9 @@ public class ProjectRepo : IProjectRepo
     
     public async Task<Project?> GetProjectById(int id)
     {
-        return await _context.Projects.FindAsync(id);
+        return await _context.Projects
+            .Include(p => p.Tasks)
+            .Include(p => p.UserProject)
+            .FirstOrDefaultAsync(p => p.Id == id);
     }
 }

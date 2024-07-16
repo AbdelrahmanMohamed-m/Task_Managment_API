@@ -26,23 +26,15 @@ public class ProjectController : ControllerBase
     [Authorize]
     public async Task<ActionResult> CreateProject([FromBody] UpdateProjectDto updateProjectDto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        // Retrieve the User ID from the User principal
+        if (!ModelState.IsValid){ return BadRequest(ModelState);}
         var username = User.GetUserName();
         var appUser = await _userManager.FindByNameAsync(username);
 
         var createdProject =
             await _projectService.CreateProject(updateProjectDto.UpdateProjectDtoToProject(), appUser.Id);
 
-        if (createdProject == null)
-        {
-            return BadRequest("Project could not be created.");
-        }
-
+        if (createdProject == null){ return BadRequest();}
+        
         return Ok(createdProject);
     }
 
@@ -72,7 +64,7 @@ public class ProjectController : ControllerBase
         var result = await _projectService.UpdateProject(updateProjectDtoToProject, id);
         if (result == null)
         {
-            return NotFound("Project not found");
+            return NotFound();
         }
 
         return Ok(result);
@@ -85,12 +77,12 @@ public class ProjectController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         var result = await _projectService.DeleteProject(id);
-        if (result == null)
+        if (result == false)
         {
-            return NotFound("there is no project with this id");
+            return NotFound();
         }
 
-        return Ok(result);
+        return NoContent();
     }
 
 
