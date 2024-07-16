@@ -11,4 +11,6 @@ public interface IUserProjectRepo
     );
 
     public Task<bool> RemoveUserFromProject(int projectId, string userId);
+    
+    public  Task<bool> CheckAssignmentExists(int projectId, string userId);
 }

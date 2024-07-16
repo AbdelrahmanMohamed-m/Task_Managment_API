@@ -9,4 +9,6 @@ public interface IUserProjectsService
         string userId);
 
     public Task<bool> RemoveUserFromProject(int projectId, string userId);
+    
+    public  Task<bool> CheckUserProjectAssignmentExists(int projectId, string userId);
 }

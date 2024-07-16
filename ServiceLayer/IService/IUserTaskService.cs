@@ -8,4 +8,6 @@ public interface IUserTaskService
     public Task<UserTaskDto> AssignUserToTask(int taskId, string userId, UserTask userTask);
 
     public Task<bool> RemoveUserFromTask(int taskId, string userId);
+    
+    public Task<bool> CheckAssignmentExists(int taskId, string userId);
 }

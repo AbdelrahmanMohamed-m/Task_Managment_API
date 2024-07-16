@@ -18,13 +18,23 @@ public class UserProjectService : IUserProjectsService
     public async Task<UserProjectDto> AssignUserToProject(ProjectsCollaborators projectsCollaborators, int projectId,
         string userId)
     {
-        
-        await _userProjectRepo.AssignUserToProject(projectsCollaborators, projectId, userId);
-        return projectsCollaborators.MapToDto();
+        var result = await _userProjectRepo.AssignUserToProject(projectsCollaborators, projectId, userId);
+
+        if (result == null)
+        {
+            return null;
+        }
+
+        return result.MapToDto();
     }
 
-    public async Task<bool> RemoveUserFromProject(int projectId , string userId )
+    public async Task<bool> RemoveUserFromProject(int projectId, string userId)
     {
         return await _userProjectRepo.RemoveUserFromProject(projectId, userId);
+    }
+
+    public async Task<bool> CheckUserProjectAssignmentExists(int projectId, string userId)
+    {
+        return await _userProjectRepo.CheckAssignmentExists(projectId, userId);
     }
 }

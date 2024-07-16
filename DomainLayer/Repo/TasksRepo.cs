@@ -26,9 +26,14 @@ public class TasksRepo : ITasksRepo
 
     public async Task<Tasks?> AddTask(Tasks? task, int projectId, string userId)
     {
-        await _context.Projects.FindAsync(projectId);
+        var project = await _context.Projects.FindAsync(projectId);
 
-        task.ProjectId = projectId;
+        if (project ==null)
+        {
+            return null;
+        }
+
+        task.ProjectId = project.Id;
         await _context.Tasks.AddAsync(task);
         await _context.SaveChangesAsync();
         await _context.UserTasks.AddAsync(new UserTask { UserId = userId, TaskId = task.Id });

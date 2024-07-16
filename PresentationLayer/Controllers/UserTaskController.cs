@@ -29,6 +29,13 @@ public class UserTaskController : ControllerBase
             return BadRequest("User not found");
         }
 
+        var existingAssignment = await _userTaskService.CheckAssignmentExists(taskId, userId);
+
+        if (existingAssignment)
+        {
+            return StatusCode(StatusCodes.Status409Conflict, "User is already assigned to the Task.");
+        }
+
         var userProject = new UserTask
         {
             UserId = userId,
@@ -50,6 +57,12 @@ public class UserTaskController : ControllerBase
         }
 
         var result = await _userTaskService.RemoveUserFromTask(taskId, userId);
+
+        if (!result)
+        {
+            return NotFound("Task Does not exist.");
+        }
+
         return Ok(result);
     }
 }

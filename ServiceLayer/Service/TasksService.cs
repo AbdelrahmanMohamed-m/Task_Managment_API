@@ -26,6 +26,10 @@ public class TasksService : ITasksService
     public async Task<TasksDto?> AddTask(Tasks? task, int projectId, string userId)
     {
         var taskEntity = await _tasksRepo.AddTask(task, projectId, userId);
+        if (taskEntity == null)
+        {
+            return null;
+        }
         return taskEntity.TasksMapToTasksDto();
     }
 

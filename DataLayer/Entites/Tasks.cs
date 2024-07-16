@@ -14,8 +14,8 @@ namespace Task_Managment_API.DataLayer.Entites
         public DateTime UpdatedAt { get; set; }
         public int ProjectId { get; set; }
         public Project Project { get; set; } 
-        
-        public ICollection<UserTask> UserTasks { get; set; }
-        
+
+        public ICollection<UserTask> UserTasks { get; set; } = new List<UserTask>();
+
     }
 }

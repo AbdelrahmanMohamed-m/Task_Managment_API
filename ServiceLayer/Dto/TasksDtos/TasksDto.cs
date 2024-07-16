@@ -27,6 +27,8 @@ public class TasksDto
 
     public DateTime UpdatedAt { get; set; }
 
-    public int ProjectId { get; set; } // Foreign key to Project
+    public int ProjectId { get; set; } 
+    
+    
 
 }

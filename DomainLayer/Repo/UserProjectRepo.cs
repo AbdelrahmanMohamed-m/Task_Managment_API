@@ -16,8 +16,27 @@ public class UserProjectRepo : IUserProjectRepo
     public async Task<ProjectsCollaborators> AssignUserToProject(ProjectsCollaborators projectsCollaborators,
         int projectId, string userId)
     {
-        projectsCollaborators.ProjectId = projectId;
-        projectsCollaborators.UserId = userId;
+        var existingAssignment = await _context.UserProjects
+            .AnyAsync(up => up.ProjectId == projectId && up.UserId == userId);
+
+        if (existingAssignment)
+        {
+            Console.WriteLine($"User {userId} is already assigned to project {projectId}.");
+            return null; // Or handle as needed
+        }
+
+        var projectResult = await _context.Projects.FindAsync(projectId);
+
+        var userResult = await _context.Users.FindAsync(userId);
+
+        if (projectResult == null || userResult == null)
+        {
+            Console.WriteLine($"Project or User not found for ProjectId: {projectId}, UserId: {userId}");
+            return null;
+        }
+
+        projectsCollaborators.ProjectId = projectResult.Id;
+        projectsCollaborators.UserId = userResult.Id;
 
 
         await _context.UserProjects.AddAsync(projectsCollaborators);
@@ -40,5 +59,10 @@ public class UserProjectRepo : IUserProjectRepo
         await _context.SaveChangesAsync();
         Console.WriteLine($"Project collaborator removed for ProjectId: {projectId}, UserId: {userId}");
         return true;
+    }
+    
+    public async Task<bool> CheckAssignmentExists(int projectId, string userId)
+    {
+        return await _context.UserProjects.AnyAsync(up => up.ProjectId == projectId && up.UserId == userId);
     }
 }

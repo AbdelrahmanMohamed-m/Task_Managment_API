@@ -1,7 +1,9 @@
 using System.Text;
+using System.Threading.RateLimiting;
 using api.Config;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -51,7 +53,18 @@ builder.Services.AddScoped<IUserProjectsService, UserProjectService>();
  builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
  builder.Services.AddProblemDetails();
 
-// 
+//  Rate Limiter
+ builder.Services.AddRateLimiter(options =>
+ {
+     options.AddConcurrencyLimiter("ConcurrencyRateLimiter", opt =>
+     {
+         opt.PermitLimit = 20;
+         opt.QueueLimit = 5;
+         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+     }).RejectionStatusCode = 429;
+ });
+ builder.Services.AddResponseCaching();
+
 
 // Registering Repositories and Services
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
@@ -131,6 +144,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseRateLimiter();
 app.UseExceptionHandler();
 app.UseResponseCaching();
 app.UseHttpsRedirection();

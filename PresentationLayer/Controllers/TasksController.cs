@@ -50,18 +50,18 @@ public class TasksController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        try
+
+        var username = User.GetUserName();
+        var appUser = await _userManager.FindByNameAsync(username);
+        var createTask = task.TasksDtoMapToTasksEntity();
+        var result = await _tasksService.AddTask(createTask, projectId, appUser.Id);
+
+        if (result == null)
         {
-            var username = User.GetUserName();
-            var appUser = await _userManager.FindByNameAsync(username);
-            var createTask = task.TasksDtoMapToTasksEntity();
-            var result = await _tasksService.AddTask(createTask, projectId, appUser.Id);
-            return Ok(result.TasksDtoMapToTasksEntity());
+            return BadRequest();
         }
-        catch (KeyNotFoundException e)
-        {
-            return BadRequest(e.Message);
-        }
+
+        return Ok(result);
     }
 
     [HttpGet]

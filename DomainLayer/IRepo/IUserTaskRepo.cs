@@ -13,4 +13,7 @@ public interface IUserTaskRepo
     public Task<bool> RemoveUserFromTask(
         int taskId,
         string userId);
+    
+    public Task<bool> CheckAssignmentExists( int taskId, string userId);
+    
 }

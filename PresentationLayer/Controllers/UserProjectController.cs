@@ -31,12 +31,20 @@ public class UserProjectController : ControllerBase
             return NotFound("User not found");
         }
 
+        var existingAssignment = await _userProjectsService.CheckUserProjectAssignmentExists(projectId, userId);
+
+        if (existingAssignment)
+        {
+            return StatusCode(StatusCodes.Status409Conflict, "User is already assigned to the project.");
+        }
+
         var userProject = new ProjectsCollaborators
         {
             UserId = userId,
             ProjectId = projectId
         };
         var result = await _userProjectsService.AssignUserToProject(userProject, projectId, userId);
+
         return Ok(result);
     }
 

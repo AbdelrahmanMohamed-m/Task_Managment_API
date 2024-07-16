@@ -15,10 +15,22 @@ public class UserTaskRepo : IUserTaskRepo
 
     public async Task<UserTask> AssignUserToTask(UserTask userTasks, int taskId, string userId)
     {
-        userTasks.UserId = userId;
-        userTasks.TaskId = taskId;
+        var taskIdResult = await _context.Tasks.FindAsync(taskId);
+
+        var userResult = await _context.Users.FindAsync(userId);
+        if (taskIdResult == null || userResult == null)
+        {
+            Console.WriteLine($"Task or User not found for TaskId: {taskId}, UserId: {userId}");
+            return null;
+        }
+        userTasks.UserId = userResult.Id;
+        userTasks.TaskId = taskIdResult.Id;
+
+       
 
         await _context.UserTasks.AddAsync(userTasks);
+
+
         await _context.SaveChangesAsync();
         return userTasks;
     }
@@ -38,5 +50,10 @@ public class UserTaskRepo : IUserTaskRepo
         await _context.SaveChangesAsync();
         Console.WriteLine($"User task removed for TaskId: {taskId}, UserId: {userId}");
         return true;
+    }
+
+    public async Task<bool> CheckAssignmentExists(int taskId, string userId)
+    {
+        return await _context.UserTasks.AnyAsync(up => up.TaskId == taskId && up.UserId == userId);
     }
 }
