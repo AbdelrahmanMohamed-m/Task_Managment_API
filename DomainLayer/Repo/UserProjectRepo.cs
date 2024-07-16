@@ -25,18 +25,20 @@ public class UserProjectRepo : IUserProjectRepo
         return projectsCollaborators;
     }
 
-    public async Task<bool> RemoveUserFromProject(ProjectsCollaborators projectsCollaborators, int userProjectId)
+    public async Task<bool> RemoveUserFromProject(int projectId, string userId)
     {
-        var findEntityById = await _context.UserProjects.FindAsync(userProjectId);
-        if (findEntityById == null)
+        var projectsCollaborator = await _context.UserProjects
+            .FirstOrDefaultAsync(pc => pc.ProjectId == projectId && pc.UserId == userId);
+
+        if (projectsCollaborator == null)
         {
+            Console.WriteLine($"Project collaborator not found for ProjectId: {projectId}, UserId: {userId}");
             return false;
         }
 
-        _context.UserProjects.Remove(findEntityById);
+        _context.UserProjects.Remove(projectsCollaborator);
         await _context.SaveChangesAsync();
+        Console.WriteLine($"Project collaborator removed for ProjectId: {projectId}, UserId: {userId}");
         return true;
     }
-
-   
 }

@@ -8,11 +8,7 @@ public interface IUserProjectRepo
         ProjectsCollaborators projectsCollaborators,
         int projectId,
         string userId
-        );
+    );
 
-    public Task<bool> RemoveUserFromProject(
-        ProjectsCollaborators projectsCollaborators,
-        int userProjectId
-        );
-
+    public Task<bool> RemoveUserFromProject(int projectId, string userId);
 }

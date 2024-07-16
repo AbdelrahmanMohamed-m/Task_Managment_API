@@ -40,6 +40,8 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITasksRepo, TasksRepo>();
 builder.Services.AddScoped<ITasksService, TasksService>();
 
+builder.Services.AddScoped<IUserTaskRepo, UserTaskRepo>();
+builder.Services.AddScoped<IUserTaskService, UserTaskService>();
 builder.Services.AddScoped<IUserProjectRepo, UserProjectRepo>();
 builder.Services.AddScoped<IUserProjectsService, UserProjectService>();
 

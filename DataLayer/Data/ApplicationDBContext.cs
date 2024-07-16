@@ -20,15 +20,14 @@ public class ApplicationDbContext : IdentityDbContext<User>
 
         modelBuilder.Entity<ProjectsCollaborators>().HasKey(up => up.Id);
         modelBuilder.Entity<ProjectsCollaborators>().Property(e => e.Id).ValueGeneratedOnAdd();
-        // UserProject relationship
-        modelBuilder.Entity<ProjectsCollaborators>()
-            .HasKey(up => new { up.UserId, up.ProjectId });
 
+        // User and Project relationship
         modelBuilder.Entity<ProjectsCollaborators>()
             .HasOne(up => up.User)
             .WithMany(u => u.UserProjects)
             .HasForeignKey(up => up.UserId);
 
+        
         modelBuilder.Entity<ProjectsCollaborators>()
             .HasOne(up => up.Project)
             .WithMany(p => p.UserProject)

@@ -41,16 +41,17 @@ public class UserProjectController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("RemoveUserFromProject")]
+    [Route("RemoveUserFromProject/{projectId}")]
     [Authorize]
-    public async Task<IActionResult> RemoveUserFromProject(int userProjectId)
+    public async Task<IActionResult> RemoveUserFromProject([FromRoute] int projectId, [FromQuery] string userId)
     {
-        var userProject = new ProjectsCollaborators
+        var result = await _userProjectsService.RemoveUserFromProject(projectId, userId);
+
+        if (!result)
         {
-            Id = userProjectId
-        };
-        var result = await _userProjectsService.RemoveUserFromProject(userProject, userProjectId);
+            return NotFound($"Project collaborator not found for ProjectId: {projectId}, UserId: {userId}");
+        }
+
         return Ok(result);
     }
-    
 }
