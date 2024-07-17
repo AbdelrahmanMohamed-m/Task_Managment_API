@@ -1,0 +1,10 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/CodeInspection/PencilsConfiguration/ActualSeverity/@EntryValue">INFO</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=73a38d4a_002D68d5_002D45c4_002Db34e_002D08da9f8cbcd1/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="UnitTest1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::EABF2190-1694-4BFD-8560-3C65C5506EBF::net8.0::ProjectControllerTests.CreateProject_ReturnsOk_WhenProjectIsCreated&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::EABF2190-1694-4BFD-8560-3C65C5506EBF::net8.0::ProjectControllerTests.GetProjectById_ReturnsOk_WhenProjectIsFound&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::EABF2190-1694-4BFD-8560-3C65C5506EBF::net8.0::ProjectControllerTests.GetallUserPreojects_ReturnsOk_WhenProjectsAreFound&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::EABF2190-1694-4BFD-8560-3C65C5506EBF::net8.0::ProjectControllerTests.GetAllUserProjects_ReturnsOk_WhenProjectsAreFound&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
