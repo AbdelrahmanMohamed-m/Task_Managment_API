@@ -35,6 +35,10 @@ public class TasksController : ControllerBase
         // Retrieve the User ID from the User principal
         var username = User.GetUserName();
         var appUser = await _userManager.FindByNameAsync(username);
+        if (appUser == null)
+        {
+            return Unauthorized();
+        }
         var result = await _tasksService.GetAllUserTasks(appUser.Id);
         return Ok(result);
     }
@@ -53,6 +57,10 @@ public class TasksController : ControllerBase
 
         var username = User.GetUserName();
         var appUser = await _userManager.FindByNameAsync(username);
+        if (appUser == null)
+        {
+            return Unauthorized();
+        }
         var createTask = task.TasksDtoMapToTasksEntity();
         var result = await _tasksService.AddTask(createTask, projectId, appUser.Id);
 

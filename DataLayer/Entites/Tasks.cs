@@ -5,6 +5,7 @@ namespace Task_Managment_API.DataLayer.Entites
     public class Tasks
     {
         public int Id { get; set; }
+        public Guid TaskId { get; set; }
         public string Title { get; set; } = "";
         public string Description { get; set; } = "";
         public DateTime DueDate { get; set; }
@@ -13,7 +14,7 @@ namespace Task_Managment_API.DataLayer.Entites
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public int ProjectId { get; set; }
-        public Project Project { get; set; } 
+        public Project Project { get; set; }
 
         public ICollection<UserTask> UserTasks { get; set; } = new List<UserTask>();
 

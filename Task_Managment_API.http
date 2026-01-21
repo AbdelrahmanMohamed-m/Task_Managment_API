@@ -4,3 +4,35 @@ GET {{Task_Managment_API_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+# Test Stripe Customer Creation
+POST {{Task_Managment_API_HostAddress}}/api/payment/customer
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "name": "Test User"
+}
+
+###
+
+# Test Stripe Subscription Creation (use customer ID from above)
+POST {{Task_Managment_API_HostAddress}}/api/payment/subscription
+Content-Type: application/json
+
+{
+  "customerId": "cus_xxx",  # Replace with actual customer ID
+  "priceId": "price_xxx"    # Replace with actual price ID from Stripe dashboard
+}
+
+###
+
+# Test Stripe Customer Portal (use customer ID)
+POST {{Task_Managment_API_HostAddress}}/api/payment/portal
+Content-Type: application/json
+
+{
+  "customerId": "cus_xxx"  # Replace with actual customer ID
+}
+
+###

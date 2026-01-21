@@ -1,7 +1,6 @@
 using System.Text;
 using System.Threading.RateLimiting;
 using api.Config;
-using Bogus;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
@@ -9,13 +8,17 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
-using Task_Managment_API.DataLayer.Entites;
+using RabbitMQ.Client;
+using Stripe;
 using Task_Managment_API.DataLayer.Entities;
 using Task_Managment_API.DomainLayer.ExceptionHandler;
 using Task_Managment_API.DomainLayer.IRepo;
 using Task_Managment_API.DomainLayer.Repo;
+using Task_Managment_API.Options;
 using Task_Managment_API.ServiceLayer.IService;
 using Task_Managment_API.ServiceLayer.Service;
+using AccountService = Task_Managment_API.ServiceLayer.Service.AccountService;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +37,19 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 // Database Configuration ends here
 
+// RabbitMQ Configuration
+builder.Services.AddSingleton<IConnectionFactory>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    return new ConnectionFactory
+    {
+        HostName = config["RabbitMQ:HostName"],
+        Port = int.Parse(config["RabbitMQ:Port"]),
+        UserName = config["RabbitMQ:UserName"],
+        Password = config["RabbitMQ:Password"]
+    };
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IAccountService, AccountService>();
@@ -49,22 +65,22 @@ builder.Services.AddScoped<IUserTaskService, UserTaskService>();
 builder.Services.AddScoped<IUserProjectRepo, UserProjectRepo>();
 builder.Services.AddScoped<IUserProjectsService, UserProjectService>();
 
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 // Error Handling init in DI
- builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
- builder.Services.AddProblemDetails();
-
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 //  Rate Limiter
- builder.Services.AddRateLimiter(options =>
- {
-     options.AddConcurrencyLimiter("ConcurrencyRateLimiter", opt =>
-     {
-         opt.PermitLimit = 20;
-         opt.QueueLimit = 5;
-         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-     }).RejectionStatusCode = 429;
- });
- builder.Services.AddResponseCaching();
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddConcurrencyLimiter("ConcurrencyRateLimiter", opt =>
+    {
+        opt.PermitLimit = 20;
+        opt.QueueLimit = 5;
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    }).RejectionStatusCode = 429;
+});
+builder.Services.AddResponseCaching();
 
 
 // Registering Repositories and Services
@@ -134,6 +150,17 @@ builder.Services.AddAuthentication(options =>
     }
 );
 
+builder.Services.Configure<StripeOptions>(builder.Configuration.GetSection("Stripe"));
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
+builder.Services.AddHttpClient("AuditApi", client =>
+{
+    client.BaseAddress = new Uri(
+     builder.Configuration["AuditApi:BaseUrl"]
+ );
+
+});
+builder.Services.AddScoped<IAuditClient, AuditClient>();
 
 // Install: dotnet add package Bogus
 
@@ -148,98 +175,13 @@ builder.Services.AddCors(options =>
     });
 });
 var app = builder.Build();
-// using (var scope = app.Services.CreateScope())
-// {
-//     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-//     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-//     context.Database.EnsureCreated();
-
-//     // Create test user if doesn't exist
-//     var testUser = await userManager.FindByNameAsync("testuser");
-//     if (testUser == null)
-//     {
-//         testUser = new User
-//         {
-//             UserName = "testuser",
-//             Email = "test@example.com"
-//         };
-//         await userManager.CreateAsync(testUser, "password123");
-//     }
-
-//     // Add fake projects if none exist
-//     if (!context.Projects.Any())
-//     {
-//         var projectFaker = new Faker<Project>()
-//             .RuleFor(p => p.Name, f => f.Company.CompanyName() + " Project")
-//             .RuleFor(p => p.Description, f => f.Lorem.Sentences(2))
-//             .RuleFor(p => p.StartDate, f => f.Date.Past(1))
-//             .RuleFor(p => p.EndDate, f => f.Date.Future(1))
-//             .RuleFor(p => p.CreatedAt, f => f.Date.Past(2))
-//             .RuleFor(p => p.UpdatedAt, f => f.Date.Recent());
-
-//         var fakeProjects = projectFaker.Generate(5);
-//         context.Projects.AddRange(fakeProjects);
-//         await context.SaveChangesAsync();
-
-//         // Add user-project relationships
-//         foreach (var project in fakeProjects)
-//         {
-//             var userProject = new ProjectsCollaborators
-//             {
-//                 UserId = testUser.Id,
-//                 ProjectId = project.Id
-//             };
-//             context.UserProjects.Add(userProject);
-//         }
-//         await context.SaveChangesAsync();
-//     }
-//     // Add fake tasks if none exist
-// if (!context.Tasks.Any())
-// {
-//     // Get the projects we just created
-//     var existingProjects = context.Projects.ToList();
-    
-//     var taskFaker = new Faker<Tasks>()
-//         .RuleFor(t => t.Title, f => f.Hacker.Phrase())
-//         .RuleFor(t => t.Description, f => f.Lorem.Paragraph())
-//         .RuleFor(t => t.Priority, f => f.PickRandom("Low", "Medium", "High", "Critical"))
-//         .RuleFor(t => t.Status, f => f.PickRandom("Not Started", "In Progress", "Completed", "On Hold"))
-//         .RuleFor(t => t.DueDate, f => f.Date.Future(2))
-//         .RuleFor(t => t.CreatedAt, f => f.Date.Past(1))
-//         .RuleFor(t => t.UpdatedAt, f => f.Date.Recent());
-
-//     var fakeTasks = new List<Tasks>();
-    
-//     // Create 3-5 tasks per project
-//     foreach (var project in existingProjects)
-//     {
-//         var tasksForProject = taskFaker.Generate(Random.Shared.Next(3, 6));
-//         foreach (var task in tasksForProject)
-//         {
-//             task.ProjectId = project.Id;
-//         }
-//         fakeTasks.AddRange(tasksForProject);
-//     }
-    
-//     context.Tasks.AddRange(fakeTasks);
-//     await context.SaveChangesAsync();
-    
-//     // Add user-task relationships
-//     foreach (var task in fakeTasks)
-//     {
-//         var userTask = new UserTask
-//         {
-//             UserId = testUser.Id,
-//             TaskId = task.Id
-//         };
-//         context.UserTasks.Add(userTask);
-//     }
-//     await context.SaveChangesAsync();
-// }
-// }
-
-
+// Apply migrations
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
