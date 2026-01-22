@@ -52,14 +52,14 @@
     ports:
     - "5080:8080"
     environment:
-    - MongoDb__ConnectionString=${MONGO_CONNECTION_STRING}
-    - MongoDb__DatabaseName=${MONGO_DATABASE}
-    - RabbitMQ__HostName=${RABBITMQ_HOST}
-    - RabbitMQ__Port=${RABBITMQ_PORT}
-    - RabbitMQ__UserName=${RABBITMQ_USERNAME}
-    - RabbitMQ__Password=${RABBITMQ_PASSWORD}
-    - RabbitMQ__QueueName=${RABBITMQ_QUEUE}
-    - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+    - MongoDb__ConnectionString=mongodb://mongodb:27017  
+    - MongoDb__DatabaseName=AuditDb                      
+    - RabbitMQ__HostName=rabbitmq
+    - RabbitMQ__Port=5672
+    - RabbitMQ__UserName=guest
+    - RabbitMQ__Password=guest
+    - RabbitMQ__QueueName=activities
+    - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       mongodb:
        condition: service_healthy
@@ -73,18 +73,12 @@
     ports:
       - "5000:8080"
     environment:
-      - ConnectionStrings__DefaultConnection=Server=${DB_SERVER};Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};TrustServerCertificate=True;
-      - RabbitMQ__HostName=${RABBITMQ_HOST}
-      - RabbitMQ__Port=${RABBITMQ_PORT}
-      - RabbitMQ__UserName=${RABBITMQ_USERNAME}
-      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
-      - RabbitMQ__QueueName=${RABBITMQ_QUEUE}
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - Stripe__SecretKey=${STRIPE_SECRET_KEY}
-      - JWT__Issuer=${JWT_ISSUER}
-      - JWT__Audience=${JWT_AUDIENCE}
-      - JWT__signingKey=${JWT_SIGNING_KEY}
-      - AuditApi__BaseUrl=${AUDIT_API_BASE_URL}
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=TaskDb;User Id=sa;Password=StrongPassword123!;TrustServerCertificate=True;
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+      - RabbitMQ__QueueName=activities
+      - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       sqlserver:
         condition: service_healthy
