@@ -4,14 +4,14 @@
     container_name: task-sql
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=StrongPassword123!
+      - SA_PASSWORD=${DB_PASSWORD}
       - MSSQL_PID=Developer
     ports:
       - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
     healthcheck:
-      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P StrongPassword123! -Q 'SELECT 1' -C || exit 1" ]
+      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${DB_PASSWORD} -Q 'SELECT 1' -C || exit 1" ]
       interval: 10s
       timeout: 10s
       retries: 10
@@ -52,14 +52,14 @@
     ports:
     - "5080:8080"
     environment:
-    - MongoDb__ConnectionString=mongodb://mongodb:27017  
-    - MongoDb__DatabaseName=AuditDb                      
-    - RabbitMQ__HostName=rabbitmq
-    - RabbitMQ__Port=5672
-    - RabbitMQ__UserName=guest
-    - RabbitMQ__Password=guest
-    - RabbitMQ__QueueName=activities
-    - ASPNETCORE_ENVIRONMENT=Development
+    - MongoDb__ConnectionString=${MONGO_CONNECTION_STRING}
+    - MongoDb__DatabaseName=${MONGO_DATABASE}
+    - RabbitMQ__HostName=${RABBITMQ_HOST}
+    - RabbitMQ__Port=${RABBITMQ_PORT}
+    - RabbitMQ__UserName=${RABBITMQ_USERNAME}
+    - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+    - RabbitMQ__QueueName=${RABBITMQ_QUEUE}
+    - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
     depends_on:
       mongodb:
        condition: service_healthy
@@ -73,12 +73,18 @@
     ports:
       - "5000:8080"
     environment:
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=TaskDb;User Id=sa;Password=StrongPassword123!;TrustServerCertificate=True;
-      - RabbitMQ__HostName=rabbitmq
-      - RabbitMQ__UserName=guest
-      - RabbitMQ__Password=guest
-      - RabbitMQ__QueueName=activities
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=${DB_SERVER};Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};TrustServerCertificate=True;
+      - RabbitMQ__HostName=${RABBITMQ_HOST}
+      - RabbitMQ__Port=${RABBITMQ_PORT}
+      - RabbitMQ__UserName=${RABBITMQ_USERNAME}
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+      - RabbitMQ__QueueName=${RABBITMQ_QUEUE}
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - Stripe__SecretKey=${STRIPE_SECRET_KEY}
+      - JWT__Issuer=${JWT_ISSUER}
+      - JWT__Audience=${JWT_AUDIENCE}
+      - JWT__signingKey=${JWT_SIGNING_KEY}
+      - AuditApi__BaseUrl=${AUDIT_API_BASE_URL}
     depends_on:
       sqlserver:
         condition: service_healthy
