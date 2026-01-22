@@ -2,7 +2,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using Task_Managment_API.DataLayer.Entites;
 using Task_Managment_API.DataLayer.Entities;
 using Task_Managment_API.ServiceLayer.IService;
 
@@ -24,8 +23,8 @@ public class AccountService : IAccountService
     {
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.GivenName, user.UserName)
+                new(JwtRegisteredClaimNames.Email, user.Email),
+                new(JwtRegisteredClaimNames.GivenName, user.UserName)
             };
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
 

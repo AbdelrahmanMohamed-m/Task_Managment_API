@@ -34,11 +34,9 @@ public class ApplicationDbContext : IdentityDbContext<User>
             .HasForeignKey(up => up.ProjectId);
 
 
-        modelBuilder.Entity<UserTask>().HasKey(ut => ut.Id);
-        modelBuilder.Entity<UserTask>().Property(e => e.Id).ValueGeneratedOnAdd();
-        // UserTask relationship
+        // UserTask relationship - composite primary key
         modelBuilder.Entity<UserTask>()
-            .HasKey(ut => new { ut.UserId, ut.TaskId});
+            .HasKey(ut => new { ut.UserId, ut.TaskId });
 
         modelBuilder.Entity<UserTask>()
             .HasOne(ut => ut.User)

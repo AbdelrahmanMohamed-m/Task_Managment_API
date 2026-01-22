@@ -5,7 +5,6 @@ namespace Task_Managment_API.DataLayer.Entites
     public class Tasks
     {
         public int Id { get; set; }
-        public Guid TaskId { get; set; }
         public string Title { get; set; } = "";
         public string Description { get; set; } = "";
         public DateTime DueDate { get; set; }

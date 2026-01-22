@@ -28,10 +28,6 @@ public class TasksService : ITasksService
 
     public async Task<TasksDto?> AddTask(Tasks? task, int projectId, string userId)
     {
-        if (task != null)
-        {
-            task.TaskId = Guid.NewGuid();
-        }
         var taskEntity = await _tasksRepo.AddTask(task, projectId, userId);
         if (taskEntity == null)
         {
@@ -39,7 +35,7 @@ public class TasksService : ITasksService
         }
         await _auditClient.LogAsync(new CreateActivityRequest
         {
-            TaskId = taskEntity.TaskId,
+            TaskId = Guid.NewGuid(),
             Action = "TaskCreated",
             PerformedBy = userId,
             Details = new Dictionary<string, object>

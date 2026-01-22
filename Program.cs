@@ -2,6 +2,7 @@ using System.Text;
 using System.Threading.RateLimiting;
 using api.Config;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ using Task_Managment_API.Options;
 using Task_Managment_API.ServiceLayer.IService;
 using Task_Managment_API.ServiceLayer.Service;
 using AccountService = Task_Managment_API.ServiceLayer.Service.AccountService;
+using IConnectionFactory = RabbitMQ.Client.IConnectionFactory;
 
 
 var builder = WebApplication.CreateBuilder(args);
