@@ -2,7 +2,7 @@ using System.Text;
 using System.Threading.RateLimiting;
 using api.Config;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Connections;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -53,7 +53,6 @@ builder.Services.AddSingleton<IConnectionFactory>(sp =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IAccountService, AccountService>();
 
 builder.Services.AddScoped<IProjectRepo, ProjectRepo>();
@@ -91,6 +90,7 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 builder.Services.AddSwaggerGen(option =>
 {
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
+
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -117,16 +117,15 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
-builder.Services.AddIdentity<User, IdentityRole>(
-    options =>
-    {
-        options.User.RequireUniqueEmail = true;
-        options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequireDigit = false;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireLowercase = false;
-        options.Password.RequiredLength = 6;
-    }).AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+{
+    options.User.RequireUniqueEmail = true;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireDigit = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequiredLength = 6;
+}).AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -136,18 +135,21 @@ builder.Services.AddAuthentication(options =>
                 options.DefaultScheme =
                     options.DefaultSignInScheme =
                         options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(
-    options =>
+}).AddJwtBearer(options =>
     {
+        var signingKey = builder.Configuration["JWT:signingKey"];
+        var issuer = builder.Configuration["JWT:Issuer"];
+        var audience = builder.Configuration["JWT:Audience"];
+
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JWT:Issuer"],
+            ValidIssuer = issuer,
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["JWT:Audience"],
+            ValidAudience = audience,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey =
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:signingKey"])),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey)),
         };
     }
 );
@@ -158,9 +160,8 @@ StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 builder.Services.AddHttpClient("AuditApi", client =>
 {
     client.BaseAddress = new Uri(
-     builder.Configuration["AuditApi:BaseUrl"]
- );
-
+        builder.Configuration["AuditApi:BaseUrl"]
+    );
 });
 builder.Services.AddScoped<IAuditClient, AuditClient>();
 
@@ -172,8 +173,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowReactApp", policy =>
     {
         policy.WithOrigins("http://localhost:3000")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 var app = builder.Build();
@@ -182,21 +183,47 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.Migrate();
+    try
+    {
+        dbContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        // Log the error but don't crash if database already exists
+        Console.WriteLine($"Migration warning: {ex.Message}");
+    }
 }
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwagger(c =>
+    {
+        c.RouteTemplate = "swagger/{documentName}/swagger.json";
+
+        c.PreSerializeFilters.Add((swagger, req) =>
+        {
+            swagger.Servers = new List<OpenApiServer>
+            {
+                new OpenApiServer { Url = "/" }
+            };
+        });
+    });
+
+    app.UseSwaggerUI(c =>
+    {
+        c.RoutePrefix = "swagger";
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Demo API v1");
+    });
+
 }
+
 app.UseCors("AllowReactApp");
 app.UseRateLimiter();
 app.UseExceptionHandler();
 app.UseResponseCaching();
-app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-

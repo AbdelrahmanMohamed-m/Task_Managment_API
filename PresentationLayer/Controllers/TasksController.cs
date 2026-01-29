@@ -10,7 +10,7 @@ using Task_Managment_API.ServiceLayer.Mappers;
 
 namespace Task_Managment_API.PresentationLayer.Controllers;
 
-[Route("api/Task")]
+[Route("api/tasks")]
 [ApiController]
 public class TasksController : ControllerBase
 {
